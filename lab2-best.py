@@ -27,7 +27,7 @@ def get_user_input():
 def run_generator():
     try:
         while True:
-            print("\n[IDLE] Waiting for button press on GPIO 4...")
+            print("\nPress the button...")
             while GPIO.input(BUTTON_PIN) == GPIO.HIGH:
                 time.sleep(0.1) 
             
@@ -38,37 +38,31 @@ def run_generator():
             print(f"Generating {shape} wave at {freq}Hz. Press Ctrl+C to stop.")
             
             start_time = time.time()
-            try:
-                while True:
-                    t = time.time() - start_time
-                    val = 0 # Default
+            while True:
+                t = time.time() - start_time
+                val = 0
+                
+                if shape == "sin":
+                    val = int((v_limit/2) * (1 + math.sin(2 * math.pi * freq * t)))
+                
+                elif shape == "square":
+                    val = int(v_limit) if (t * freq) % 1 < 0.5 else 0
                     
-                    if shape == "sin":
-                        val = int((v_limit/2) * (1 + math.sin(2 * math.pi * freq * t)))
-                    
-                    elif shape == "square":
-                        val = int(v_limit) if (t * freq) % 1 < 0.5 else 0
-                        
-                    elif shape == "triangle":
-                        period = 1 / freq
-                        relative_t = t % period
-                        if relative_t < (period / 2):
-                            val = int((2 * v_limit / period) * relative_t)
-                        else:
-                            val = int(v_limit - (2 * v_limit / period) * (relative_t - period/2))
-                    
-                    if dac:
-                        dac.raw_value = val
+                elif shape == "triangle":
+                    period = 1 / freq
+                    relative_t = t % period
+                    if relative_t < (period / 2):
+                        val = int((2 * v_limit / period) * relative_t)
                     else:
-                        # If no DAC, print the value every 0.5s so you know it's working
-                        if int(t * 10) % 5 == 0: 
-                             print(f"Simulated DAC Value: {val}")
+                        val = int(v_limit - (2 * v_limit / period) * (relative_t - period/2))
+                
+                if dac:
+                    dac.raw_value = val
+                else:
+                    if int(t * 10) % 5 == 0: 
+                         print(f"Simulated DAC Value: {val}")
 
-                    time.sleep(0.005) # Increased slightly for I2C stability
-                    
-            except KeyboardInterrupt:
-                print("\nWave stopped. Returning to Idle.")
-                if dac: dac.raw_value = 0 # Safety reset
+                time.sleep(0.005)
 
     except KeyboardInterrupt:
         print("\nExiting Program...")
