@@ -56,8 +56,8 @@ def run_generator():
                 else:
                     if int(t * 10) % 5 == 0: 
                          print(f"Simulated DAC Value: {val}")
-
-                time.sleep(0.005)
+                #Smooths plots the lower the number
+                time.sleep(0.0001)
 
     except KeyboardInterrupt:
         print("\nExiting Program...")
