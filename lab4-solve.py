@@ -27,18 +27,20 @@ try:
         # 3. Remove standard gravity (~9.8 m/s^2)
         net_accel = abs(magnitude - 9.8)
         
-        # ---> ADD THIS DEBUG LINE <---
-        print(f"DEBUG: Net Accel = {net_accel:.2f}")
+        # DEBUG LINE - Uncomment to see raw numbers
+        # print(f"DEBUG: Net Accel = {net_accel:.2f}")
         
         # 4. Detect a peak (a step)
         if net_accel > threshold and not is_stepping:
+            steps += 1
+            is_stepping = True
+            print(f"Step Count: {steps}")
             
         # 5. Reset when the foot is relatively still
-        # We use a lower threshold here to prevent "double bouncing"
         elif net_accel < (threshold - 0.5):
             is_stepping = False
             
-        # Poll the sensor frequently [cite: 304]
+        # Poll the sensor frequently
         sleep(0.05) 
 
 except KeyboardInterrupt:
